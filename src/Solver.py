@@ -1,125 +1,106 @@
 # List containg the table
 
-import os
 
+initialTable = []
+solvedTable = []
 try:
     lines = open('sudokus/Sudoko1.txt').read().splitlines()
 except:
     print("File does not exist")
     exit()
-table = lines
-finishedTable = lines
+
+index = 0
+for line in lines:
+    initialTable.append([])
+    solvedTable.append([])
+    for number in line:
+        initialTable[index].append(int(number))
+        solvedTable[index].append(int(number))
+    index = index + 1
 
 
+
+def isFull(table):
+    for line in table:
+        for number in line:
+            if number == 0:
+                return False
+    return True
 
 def findLegal(table, posI, posJ):
-    print("Find legal method")
-    test = int(table[posI][posJ])
+    curPos = table[posI][posJ]
+    if curPos != 0:
+        return []
 
     possibleNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-    if test == 0:
-        #Rows
-        for j in range(0, 9):
-            if j != posJ:
-                val = int(table[posI][j])
-                if val != 0 and possibleNumbers.count(val) != 0:
-                    possibleNumbers.remove(val)
-
-        #Columns
+    if curPos == 0:
         for i in range(0, 9):
-            if i != posI:
-                val = int(table[i][posJ])
-                if val != 0 and possibleNumbers.count(val) != 0:
-                    possibleNumbers.remove(val)
+            #Rows
+            if table[i][posJ] in possibleNumbers:
+                possibleNumbers.remove(table[i][posJ])
+            #Columns
+            if table[posI][i] in possibleNumbers:
+                possibleNumbers.remove(table[posI][i])
 
-        # 3x3 square
-        if posI < 3:
-            if posJ < 3:
-                #First square row 1 col 2
-                for i in range(0, 3):
-                    for j in range(0, 3):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-
-            elif posJ >= 6:
-                #Second square row 1 col 3
-                for i in range(0, 3):
-                    for j in range(6, 9):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-
-            else:
-                #Third square row 1 col 2
-                for i in range(0, 3):
-                    for j in range(3, 5):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-
-        elif posI >= 6:
-            if posJ < 3:
-                #First square row 3 col 2
-                for i in range(6, 9):
-                    for j in range(0, 3):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-            elif posJ >= 6:
-                #Second square row 3 col 3
-                for i in range(6, 9):
-                    for j in range(6, 9):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-            else:
-                #Third square row 3 col 2
-                for i in range(6, 9):
-                    for j in range(3, 6):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-
-        else:
-            if posJ < 3:
-                #First square row 2 col 1
-                for i in range(3, 6):
-                    for j in range(0, 3):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-            elif posJ >= 6:
-                #Second square row 2 col 3
-                for i in range(3, 6):
-                    for j in range(6, 9):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-            else:
-                #Third square row 2 col 2
-                for i in range(3, 6):
-                    for j in range(3, 6):
-                        if i != posI and j != posJ:
-                            val = int(table[i][posJ])
-                            if val != 0 and possibleNumbers.count(val) != 0:
-                                possibleNumbers.remove(val)
-
-
+        for i in range((posI // 3), (posI // 3 + 3)):
+            for j in range((posJ // 3), (posJ // 3 + 3)):
+                if table[i][j] in possibleNumbers:
+                    possibleNumbers.remove(table[i][j])
 
     return possibleNumbers
 
-
-for i in range(0, 9):
+def isValid(table, posI, posJ, x):
+    row = True
+    column = True
+    cell = True
     for j in range(0, 9):
-        print(findLegal(table, i, j))
+        if table[posI][j] == x:
+            row = False
 
+    for i in range(0, 9):
+        if table[i][posJ] == x:
+            column = False
+
+    for i in range((posI // 3 * 3), (posI // 3 * 3) + 3):
+        for j in range((posJ // 3 * 3), (posJ // 3 * 3) + 3):
+            if table[i][j] == x:
+                cell = False
+    return row and column and cell
+
+
+def findNextEmpty(table, posI, posJ):
+    #if table[posI][posJ] == 0:
+     #   return [posI, posJ]
+    #else:
+        # for x in range(posI, 9):
+        #     for y in range(posJ, 9):
+        #         if table[x][y] == 0:
+        #             return x, y
+        for i in range(0, 9):
+            for j in range(0, 9):
+                if(table[i][j] == 0):
+                    return i, j
+        return -1, -1
+
+
+
+def solver(table, posI, posJ):
+    i, j = findNextEmpty(table, posI, posJ)
+    if i == -1:
+        return
+
+    #legalNumbers = findLegal(table, i, j)
+
+    for x in range(1, 10):
+        if isValid(table, i, j, x):
+            table[i][j] = x
+            solver(table, i, j)
+            if isFull(table):
+                return
+    table[posI][posJ] = 0
+
+
+print(initialTable)
+solver(solvedTable, 0, 0)
+print(solvedTable)
